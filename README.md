@@ -1,5 +1,3 @@
-layout: inline
-
 # Run test
 ```
 ./gradlew run
