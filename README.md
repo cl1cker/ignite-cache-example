@@ -6,7 +6,7 @@ layout: inline
 ```
 
 ## Sample annotated output
-```text annotate
+```bash annotate
 -----Starting Pojo cache test-----
 Basic cache get by key: Key:  h2, Age: 50
 
