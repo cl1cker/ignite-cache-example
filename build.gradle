@@ -1,0 +1,75 @@
+plugins {
+    id 'application'
+    id "com.google.protobuf" version "0.9.4"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+	annotationProcessor 'org.projectlombok:lombok:1.18.30'
+	
+	testCompileOnly 'org.projectlombok:lombok:1.18.30'
+	testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    implementation "org.apache.ignite:ignite-core:2.16.0"
+    implementation "org.apache.ignite:ignite-indexing:2.16.0"
+
+    implementation 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
+    implementation 'com.google.protobuf:protobuf-java-util:3.25.2'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(18)
+    }
+}
+
+application {
+    mainClass = 'org.example.Test'
+    applicationDefaultJvmArgs = [
+        // '-Xlog:gc',
+        '-Xmx512m',
+        '-DIGNITE_NO_ASCII=true',
+        '-DIGNITE_LOGGING_LEVEL=OFF',
+        '--add-opens=java.base/jdk.internal.access=ALL-UNNAMED',
+        '--add-opens=java.base/jdk.internal.misc=ALL-UNNAMED',
+        '--add-opens=java.base/sun.nio.ch=ALL-UNNAMED',
+        '--add-opens=java.base/sun.util.calendar=ALL-UNNAMED',
+        '--add-opens=java.management/com.sun.jmx.mbeanserver=ALL-UNNAMED',
+        '--add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED',
+        '--add-opens=java.base/sun.reflect.generics.reflectiveObjects=ALL-UNNAMED',
+        '--add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED',
+        '--add-opens=java.base/java.io=ALL-UNNAMED',
+        '--add-opens=java.base/java.nio=ALL-UNNAMED',
+        '--add-opens=java.base/java.net=ALL-UNNAMED',
+        '--add-opens=java.base/java.util=ALL-UNNAMED',
+        '--add-opens=java.base/java.util.concurrent=ALL-UNNAMED',
+        '--add-opens=java.base/java.util.concurrent.locks=ALL-UNNAMED',
+        '--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang.invoke=ALL-UNNAMED',
+        '--add-opens=java.base/java.math=ALL-UNNAMED',
+        '--add-opens=java.sql/java.sql=ALL-UNNAMED',
+        '--add-opens=java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens=java.base/java.time=ALL-UNNAMED',
+        '--add-opens=java.base/java.text=ALL-UNNAMED',
+        '--add-opens=java.management/sun.management=ALL-UNNAMED',
+        '--add-opens=java.desktop/java.awt.font=ALL-UNNAMED'
+    ]}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.25.2"
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs 'build/generated/source/proto/main/java'
+        }
+    }
+}
