@@ -1,12 +1,15 @@
+layout: inline
+
 # Run test
 ```
 ./gradlew run
 ```
 
-## Annotated output
+## Sample annotated output
 ```text annotate
 -----Starting Pojo cache test-----
 Basic cache get by key: Key:  h2, Age: 50
+
 # 3 objects returns from SQL. We added 4 (.get) and removed 1 (.remove)
 Cache-backing SQL store only has all the objects: 3 
 # Performing 10k ScanQueries and showing start and end of GC counters
