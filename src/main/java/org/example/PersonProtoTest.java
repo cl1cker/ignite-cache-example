@@ -4,6 +4,7 @@ import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.*;
 
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
@@ -27,7 +28,7 @@ import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.logger.NullLogger;
 
 public class PersonProtoTest implements AutoCloseable {
-    private static final String CACHE_TABLE_NAME = "TEST";
+    private static final String CACHE_TABLE_NAME = "TESTPROTO";
     private final AtomicInteger writeBinaryCounter = new AtomicInteger(0);
     private final AtomicInteger readBinaryCounter = new AtomicInteger(0);
     private final Ignite ignite;
@@ -155,6 +156,23 @@ public class PersonProtoTest implements AutoCloseable {
         // Note, using SQL, we can just get the fields we want
         first.set(false);
         System.out.println("Repeated SqlQuery start: " + gc());
+        start = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+            var results = cache.query(new SqlFieldsQuery(String.format("SELECT age FROM \"%s\".\"%s\"", name, name)))
+                    .getAll();
+            if (first.compareAndSet(false, true)) {
+                System.out.println("  Sample results: " + results.size());
+            }
+        }
+        System.out.println("Repeated SqlQuery end took " + (System.currentTimeMillis() - start) + " -- " + gc());
+
+        cache.remove("big");
+        var builder = PersonProto.Person.newBuilder();
+        IntStream.range(0, 1000).boxed()
+                .forEach(i -> cache.withKeepBinary().put("k" + i,
+                        getAsBinary(builder.setAge(i).setName("" + i).build())));
+        first.set(false);
+        System.out.println("Repeated SqlQuery without big object and 1000 binary entries: " + gc());
         start = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++) {
             var results = cache.query(new SqlFieldsQuery(String.format("SELECT age FROM \"%s\".\"%s\"", name, name)))

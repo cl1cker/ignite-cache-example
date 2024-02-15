@@ -3,7 +3,7 @@ package org.example;
 import java.lang.management.ManagementFactory;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
+import java.util.stream.*;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteCache;
 import org.apache.ignite.Ignition;
@@ -19,7 +19,7 @@ import org.apache.ignite.configuration.IgniteConfiguration;
 import org.apache.ignite.logger.NullLogger;
 
 public class PersonPojoTest implements AutoCloseable {
-    private static final String CACHE_TABLE_NAME = "TEST";
+    private static final String CACHE_TABLE_NAME = "TESTPOJO";
     private final Ignite ignite;
 
     public PersonPojoTest() {
@@ -101,7 +101,22 @@ public class PersonPojoTest implements AutoCloseable {
 
         // Note, using SQL, we can just get the fields we want
         first.set(false);
-        System.out.println("Repeated SqlQuery start: " + gc());
+        System.out.println("Repeated SqlQuery with big object start: " + gc());
+        start = System.currentTimeMillis();
+        for (int i = 0; i < 10000; i++) {
+            var results = cache.query(new SqlFieldsQuery(String.format("SELECT age FROM \"%s\".\"%s\"", name, name)))
+                    .getAll();
+            if (first.compareAndSet(false, true)) {
+                System.out.println("  Sample results: " + results.size());
+            }
+        }
+        System.out.println(
+                "Repeated SqlQuery with big object end took " + (System.currentTimeMillis() - start) + " -- " + gc());
+
+        cache.remove("big");
+        IntStream.range(0, 1000).boxed().forEach(i -> cache.put("k" + i, new PersonPojo("" + i, i)));
+        first.set(false);
+        System.out.println("Repeated SqlQuery without big object and 1000 entries: " + gc());
         start = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++) {
             var results = cache.query(new SqlFieldsQuery(String.format("SELECT age FROM \"%s\".\"%s\"", name, name)))
